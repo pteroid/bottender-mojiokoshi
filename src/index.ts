@@ -1,7 +1,6 @@
 import { Action, LineContext } from 'bottender';
+import router from './router';
 
-export default async function App(
-  context: LineContext
-): Promise<Action<LineContext> | void> {
-  await context.sendText('Welcome to Bottender');
+export default async function App(): Promise<Action<LineContext> | void> {
+  return router;
 }
