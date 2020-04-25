@@ -9,11 +9,15 @@
     "test": "jest"
   },
   "dependencies": {
-    "bottender": "1.4.2",
+    "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "@ffprobe-installer/ffprobe": "^1.0.12",
     "@google-cloud/speech": "^3.6.0",
-    "@google-cloud/vision": "^1.11.0"
+    "@google-cloud/vision": "^1.11.0",
+    "bottender": "1.4.2",
+    "fluent-ffmpeg": "^2.1.2"
   },
   "devDependencies": {
+    "@types/fluent-ffmpeg": "^2.1.14",
     "@types/jest": "^25.2.1",
     "@typescript-eslint/eslint-plugin": "^2.29.0",
     "@typescript-eslint/parser": "^2.29.0",
