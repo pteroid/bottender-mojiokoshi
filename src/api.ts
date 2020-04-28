@@ -1,6 +1,8 @@
 import { ImageAnnotatorClient } from '@google-cloud/vision/build/src';
 import { getAudioMetaData, audioToFlac } from './util';
 import { SpeechClient } from '@google-cloud/speech/build/src';
+import { google } from '@google-cloud/speech/build/protos/protos';
+import Alternative = google.cloud.speech.v1p1beta1.ISpeechRecognitionAlternative;
 
 export const visionText = async (
   imageBuffer: Buffer
@@ -38,20 +40,14 @@ export const cloudSpeechToText = async (
     throw new Error('Cannot got speech api response');
   }
 
-  const transcripts = [];
-  for (const result of response.results) {
-    if (result.alternatives && result.alternatives.length > 0) {
-      const transcript = result.alternatives[0].transcript;
-      if (transcript) {
-        transcripts.push(result.alternatives[0].transcript);
-      }
-    }
-  }
-  const transcription = transcripts.join('\n');
+  const transcription = response.results
+    .map(({ alternatives }) => alternatives)
+    .filter(
+      (alternatives): alternatives is Alternative[] => alternatives != null
+    )
+    .map((alternatives) => alternatives[0]?.transcript)
+    .filter((transcript): transcript is string => transcript != null)
+    .join('\n');
 
-  if (transcription !== '') {
-    return transcription;
-  } else {
-    return null;
-  }
+  return transcription || null;
 };
