@@ -1,19 +1,8 @@
 import { LineContext } from 'bottender';
 import { AudioMessage } from 'bottender/dist/line/LineEvent';
-import { visionText, cloudSpeechToText } from './api';
+import { cloudSpeechToText } from '../api';
 
-export const imageHandler = async (context: LineContext): Promise<void> => {
-  const imageBuffer = await context.getMessageContent();
-
-  if (!imageBuffer) {
-    throw new Error('Cannot get image buffer.');
-  }
-
-  const text = await visionText(imageBuffer);
-  await context.replyText(text || 'テキストが抽出できませんでした');
-};
-
-export const audioHandler = async (context: LineContext): Promise<void> => {
+export default async (context: LineContext): Promise<void> => {
   const audio = context.event.audio as AudioMessage;
   if (audio.duration > 60000) {
     await context.replyText('1分以上の音声または動画は文字起こしできません');
@@ -25,7 +14,7 @@ export const audioHandler = async (context: LineContext): Promise<void> => {
     throw new Error('Cannot get audio buffer.');
   }
 
-  const text = await cloudSpeechToText(audioBuffer);
+  const text = await cloudSpeechToText(audioBuffer).catch(console.log);
 
   await context.replyText(
     text ||
