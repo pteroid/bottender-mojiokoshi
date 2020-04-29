@@ -1,8 +1,10 @@
 import { ImageAnnotatorClient } from '@google-cloud/vision/build/src';
-import { getAudioMetaData, audioToFlac } from './util';
+import { bufferToReadable, ToFlacStream } from './util';
 import { SpeechClient } from '@google-cloud/speech/build/src';
 import { google } from '@google-cloud/speech/build/protos/protos';
-import Alternative = google.cloud.speech.v1p1beta1.ISpeechRecognitionAlternative;
+import IStreamingRecognitionResult = google.cloud.speech.v1p1beta1.IStreamingRecognitionResult;
+
+const speechClient = new SpeechClient();
 
 export const visionText = async (
   imageBuffer: Buffer
@@ -18,36 +20,31 @@ export const visionText = async (
 export const cloudSpeechToText = async (
   audioBuffer: Buffer
 ): Promise<string | null> => {
-  const { sampleRateHertz, audioChannelCount } = await getAudioMetaData(
-    audioBuffer
-  );
-  audioBuffer = await audioToFlac(audioBuffer);
+  const stream = bufferToReadable(audioBuffer);
+  const flacStream = ToFlacStream(stream);
 
-  const client = new SpeechClient();
-
-  const [response] = await client.recognize({
+  const recognizeStream = speechClient.streamingRecognize({
     config: {
       encoding: 'FLAC',
       model: 'default',
-      sampleRateHertz,
-      audioChannelCount,
+      sampleRateHertz: 16000,
       languageCode: 'ja-JP',
     },
-    audio: { content: audioBuffer.toString('base64') },
   });
 
-  if (!response || !response.results) {
-    throw new Error('Cannot got speech api response');
+  const transcripts: string[] = [];
+  for await (const chunk of flacStream.pipe(recognizeStream)) {
+    const results: IStreamingRecognitionResult[] = chunk.results;
+    for (const result of results) {
+      if (result.alternatives && result.alternatives) {
+        const transcript = result.alternatives[0].transcript;
+        if (transcript) {
+          transcripts.push(transcript);
+        }
+      }
+    }
   }
-
-  const transcription = response.results
-    .map(({ alternatives }) => alternatives)
-    .filter(
-      (alternatives): alternatives is Alternative[] => alternatives != null
-    )
-    .map((alternatives) => alternatives[0]?.transcript)
-    .filter((transcript): transcript is string => transcript != null)
-    .join('\n');
+  const transcription = transcripts.join('\n');
 
   return transcription || null;
 };
