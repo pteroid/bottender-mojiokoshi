@@ -36,12 +36,10 @@ export const cloudSpeechToText = async (
   for await (const chunk of flacStream.pipe(recognizeStream)) {
     const results: IStreamingRecognitionResult[] = chunk.results;
     for (const result of results) {
-      if (result.alternatives && result.alternatives) {
-        const transcript = result.alternatives[0].transcript;
-        if (transcript) {
-          transcripts.push(transcript);
-        }
-      }
+      if (!result.alternatives) continue;
+      const transcript = result.alternatives[0].transcript;
+      if (!transcript) continue;
+      transcripts.push(transcript);
     }
   }
   const transcription = transcripts.join('\n');
