@@ -1,5 +1,5 @@
 import { LineContext } from 'bottender';
-import { visionText } from '../api';
+import { visionText } from '@/api';
 
 export default async (context: LineContext): Promise<void> => {
   const imageBuffer = await context.getMessageContent();

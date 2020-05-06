@@ -1,7 +1,6 @@
 import { LineContext } from 'bottender';
 import { AudioMessage } from 'bottender/dist/line/LineEvent';
-import { cloudSpeechToText } from '../api';
-
+import { cloudSpeechToText } from '@/api';
 
 export default async (context: LineContext): Promise<void> => {
   const audioMessage = context.event.audio as AudioMessage;
@@ -19,6 +18,6 @@ export default async (context: LineContext): Promise<void> => {
 
   await context.replyText(
     text ||
-      '音声を抽出できませんでした...\nモードを切り替える、または音を大きくしてみてください！',
+      '音声を抽出できませんでした...\nモードを切り替える、または音を大きくしてみてください！'
   );
 };
