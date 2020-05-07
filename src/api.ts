@@ -1,17 +1,16 @@
 import { ImageAnnotatorClient } from '@google-cloud/vision/build/src';
-import { bufferToReadable, ToFlacStream } from './util';
+import { bufferToReadable, toFlacStream } from './util';
 import { SpeechClient } from '@google-cloud/speech/build/src';
 import { google } from '@google-cloud/speech/build/protos/protos';
 import IStreamingRecognitionResult = google.cloud.speech.v1p1beta1.IStreamingRecognitionResult;
 
+const imageClient = new ImageAnnotatorClient();
 const speechClient = new SpeechClient();
 
 export const visionText = async (
   imageBuffer: Buffer
 ): Promise<string | null> => {
-  const client = new ImageAnnotatorClient();
-
-  const [result] = await client.textDetection({
+  const [result] = await imageClient.textDetection({
     image: { content: imageBuffer },
   });
   return result.fullTextAnnotation?.text || null;
@@ -21,7 +20,7 @@ export const cloudSpeechToText = async (
   audioBuffer: Buffer
 ): Promise<string | null> => {
   const stream = bufferToReadable(audioBuffer);
-  const flacStream = ToFlacStream(stream);
+  const flacStream = toFlacStream(stream);
 
   const recognizeStream = speechClient.streamingRecognize({
     config: {

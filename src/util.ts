@@ -8,5 +8,5 @@ export const bufferToReadable = (buffer: Buffer): Readable => {
   return readable;
 };
 
-export const ToFlacStream = (stream: Readable): Readable =>
+export const toFlacStream = (stream: Readable): Readable =>
   ffmpeg(stream).audioCodec('flac').format('flac').pipe() as Readable;
